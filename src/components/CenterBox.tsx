@@ -20,10 +20,7 @@ export const CenterBox = () => {
   //^create a counter to keep track of the index
   const [indexNumber, setIndexNumber] = useState<number>(1);
 
-  //^create a state to keep track of the if the length of the task list so it can adjust the padding top:
-
-  //^create a useState to update the boolean of the when a task is set to true
-  //^const [complete, setComplete] = useState<boolean>(false); //set to false by default
+  //create a state to keep track of the if the length of the task list so it can adjust the padding top:
 
   //^create a variable to handle the maximum amount of tasks
   const MaxTasks: number = 7;
@@ -53,7 +50,7 @@ export const CenterBox = () => {
         //^ Task interface is passed to the object so that errors will be raised if the required fields aren't met
         index: indexNumber, //pass a usedState that will icrement when the a new task is created
         text: getTask, // pass the text from the useState to be stored in the text parameter
-        //!complete: complete, // useState that changes for when the tasks are completed
+        complete: false, // set to false by default wihtin the object will be changed individually later on
       };
 
       //^add the object to the empty array
@@ -66,7 +63,7 @@ export const CenterBox = () => {
       alert("Please enter a task...");
     }
     //^reset the input field
-    setGetTask("");
+    setGetTask(""); //may need to do some fixes to find solution to why the field doesn't rest
   };
 
   //^Create a function to handle if a specific key is pressed and add an item to the list
@@ -83,7 +80,7 @@ export const CenterBox = () => {
         //^ Task interface is passed to the object so that errors will be raised if the required fields aren't met
         index: indexNumber, //pass a usedState that will icrement when the a new task is created
         text: getTask, // pass the text from the useState to be stored in the text parameter
-        //!complete: complete, // useState that changes for when the tasks are completed
+        complete: false, // set to false by default wihtin the object will be changed individually later on
       };
 
       //^add the object to the empty array
@@ -100,9 +97,10 @@ export const CenterBox = () => {
     setGetTask("");
   };
 
-  //? const paddingStyle = {
-  //?   paddingTop: paddingChange ? "50px" : "20px",
-  //? };
+  //^ Create a function to add completed tasks an array
+  //when button is clicked if the task index matches the the task index then the change the completed for the specific task to true
+  //If true then append the task item in the list to a new empty list that stores comleted tasks
+  //Add each completed task to the data base so that I can display them all on a completed task section or page
 
   return (
     <motion.div
