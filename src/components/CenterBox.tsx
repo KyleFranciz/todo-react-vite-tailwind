@@ -9,7 +9,11 @@ interface Tasks {
   complete?: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
 }
 
+//Create an interface for the Completed Tasks list:
+
 export const CenterBox = () => {
+  //create a toggle to help with the switch between the Active task section and the complete task section
+
   //^create a useState to store the value from the input bar
   const [getTask, setGetTask] = useState<string>("");
 
@@ -20,7 +24,9 @@ export const CenterBox = () => {
   //^create a counter to keep track of the index
   const [indexNumber, setIndexNumber] = useState<number>(1);
 
-  //create a state to keep track of the if the length of the task list so it can adjust the padding top:
+  //Create a useState to keep track of the completed task inside of it:
+  const [completedTask, setCompletedTask] = useState<Tasks[]>([]);
+  //Task interface has the tasks and completed that are stored in each iteration, since they have the same parameters
 
   //^create a variable to handle the maximum amount of tasks
   const MaxTasks: number = 7;
@@ -98,65 +104,94 @@ export const CenterBox = () => {
   };
 
   //^ Create a function to add completed tasks an array
-  //when button is clicked if the task index matches the the task index then the change the completed for the specific task to true
-  //If true then append the task item in the list to a new empty list that stores comleted tasks
-  //Add each completed task to the data base so that I can display them all on a completed task section or page
+  const addCompleteTask = (taskId: number) => {
+    // The taskID is crutial when it comes to comparing one id from another list to the completed list
+    const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //find whatever the index is in the array and giv it the value of the taskId
+
+    if (taskIndex !== -1) {
+      //if the task id is found in the array then
+      const taskToComplete = storedTasks[taskIndex]; //search the stored tasks using the index that is found in the todo list
+      //update the list:
+      const updatedTodoList = storedTasks.filter(
+        (task) => task.index !== taskId
+      ); //stores all the items from this list into the new updated list
+
+      setStoredTask(updatedTodoList); // store all the items from the updated list into the stored tasks list
+
+      setCompletedTask([
+        // in the completed task list, add the task to complete and set the completed task to true
+        ...completedTask,
+        { ...taskToComplete, complete: true },
+      ]);
+
+      console.log(completedTask);
+    } else {
+      console.log(storedTasks, "hi");
+    }
+  };
+
+  //create a function to delete the uncompleted tasks from the completed list :
 
   return (
-    <motion.div
-      initial={{ scale: 0.9, y: 100, opacity: 0 }}
-      animate={{ scale: 1, y: 0, opacity: 1 }}
-      transition={{
-        stiffness: 45,
-        damping: 9.5,
-        type: "spring",
-        bounce: 0.78,
-        duration: 0.04,
-      }}
-      className="flex flex-col"
-    >
-      <div className="flex flex-col justify-center items-center bg-[#3D3D3D] w-[550px] h-auto pt-[15px] rounded-[25px] pb-[5px]">
-        <div className="flex justify-center items-center mb-[-10px]">
-          <input
-            className="bg-[#a2a2a2] text-black rounded-4xl w-[450px] h-10 text-center font-black mr-[10px] font-[inter] focus:outline-none "
-            type="text"
-            placeholder="Add task..."
-            onChange={retrieveTask}
-            onKeyDown={handleEnter}
-          />
-          <motion.button
-            initial={false}
-            transition={{ damping: 20, type: "spring", duration: 0.4 }}
-            whileTap={{ scale: 0.85 }}
-            className="h-10 rounded-4xl flex justify-center items-center font-bold w-10 focus:outline-none text-white bg-[#2F2F2F] text-[1.4rem] "
-            onClick={storeAllTasks}
-          >
-            +
-          </motion.button>
-        </div>
+    <div>
+      <motion.div
+        initial={{ scale: 0.9, y: 100, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        transition={{
+          stiffness: 45,
+          damping: 9.5,
+          type: "spring",
+          bounce: 0.78,
+          duration: 0.04,
+        }}
+        className="flex flex-col"
+      >
+        <div className="flex flex-col justify-center items-center bg-[#3D3D3D] w-[550px] h-auto pt-[15px] rounded-[25px] pb-[5px]">
+          <div className="flex justify-center items-center mb-[-10px]">
+            <input
+              className="bg-[#a2a2a2] text-black rounded-4xl w-[450px] h-10 text-center font-black mr-[10px] font-[inter] focus:outline-none "
+              type="text"
+              placeholder="Add task..."
+              onChange={retrieveTask}
+              onKeyDown={handleEnter}
+            />
+            <motion.button
+              initial={false}
+              transition={{ damping: 20, type: "spring", duration: 0.4 }}
+              whileTap={{ scale: 0.85 }}
+              className="h-10 rounded-4xl flex justify-center items-center font-bold w-10 focus:outline-none text-white bg-[#2F2F2F] text-[1.4rem] "
+              onClick={storeAllTasks}
+            >
+              +
+            </motion.button>
+          </div>
 
-        <div className="text-white mt-[24px]">
-          {storedTasks.map((tasks) => (
-            <div className="">
-              <li
-                className="flex justify-center items-center list-none h-[40px] w-[500px] bg-[#252525] mt-[5px] rounded-[18px] font-bold mb-[8px] relative"
-                key={tasks.index}
-              >
-                {tasks.text}
-                <button
-                  className="absolute right-1 w-[30px] h-[30px] flex justify-center items-center rounded-[30px] bg-[#131313] hover:bg-[#1c1b1b]"
-                  onClick={() => deleteTasks(tasks.index)} // pass the index that
+          <div className="text-white mt-[24px]">
+            {storedTasks.map((tasks) => (
+              <div className="">
+                <li
+                  className="flex justify-center items-center list-none h-[40px] w-[500px] bg-[#252525] mt-[5px] rounded-[18px] font-bold mb-[8px] relative"
+                  key={tasks.index}
                 >
-                  x
-                </button>
-                <button className="flex justify-center items-center rounded-[30px] absolute right-10 w-[30px] h-[30px] bg-[#131313] hover:bg-[#1c1b1b]">
-                  ✓
-                </button>
-              </li>
-            </div>
-          ))}
+                  {tasks.text}
+                  <button
+                    className="absolute right-1 w-[30px] h-[30px] flex justify-center items-center rounded-[30px] bg-[#131313] hover:bg-[#1c1b1b]"
+                    onClick={() => deleteTasks(tasks.index)} // pass the index that
+                  >
+                    x
+                  </button>
+                  <button
+                    onClick={() => addCompleteTask(tasks.index)}
+                    className="flex justify-center items-center rounded-[30px] absolute right-10 w-[30px] h-[30px] bg-[#131313] hover:bg-[#1c1b1b]"
+                  >
+                    ✓
+                  </button>
+                </li>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };

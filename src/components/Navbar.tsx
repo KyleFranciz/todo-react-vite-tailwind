@@ -170,6 +170,7 @@ export const Navbar: React.FC = () => {
                 className="w-[38px] h-[38px] rounded-[30px] translate-x-[10px] inline-block hover:cursor-pointer"
                 src={user?.photoURL || ""}
                 alt=""
+                //add an onClick button that takes makes a div pop up that displays all the completed tasks when clicked
               />
             </motion.div>
             <motion.button
