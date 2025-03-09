@@ -62,8 +62,8 @@ export const Navbar: React.FC = () => {
   //create an object that stores the data for the sidebar
   const SidebarText = [
     { id: 1, icons: "", text: "Home", link: "/" },
-    { id: 2, icons: "", text: "Completed", link: "/completed" },
-    { id: 3, icons: "", text: "Contact", link: "" },
+    { id: 2, icons: "", text: "Tasks", link: "/todo" },
+    { id: 3, icons: "", text: "Completed", link: "/completed" },
     { id: 4, icons: "", text: "About", link: "" },
   ];
 
