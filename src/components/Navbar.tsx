@@ -62,7 +62,7 @@ export const Navbar: React.FC = () => {
   //create an object that stores the data for the sidebar
   const SidebarText = [
     { id: 1, icons: "", text: "Home", link: "/" },
-    { id: 2, icons: "", text: "Completed", link: "" },
+    { id: 2, icons: "", text: "Completed", link: "/completed" },
     { id: 3, icons: "", text: "Contact", link: "" },
     { id: 4, icons: "", text: "About", link: "" },
   ];
@@ -82,7 +82,7 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="flex  w-full items-center justify-between top-0 left-0 right-0 fixed h-14 z-10">
+    <div className="flex  w-full items-center justify-between top-0 left-0 right-0 fixed h-14 z-[20]">
       <div className="">
         {/*Menu Icon for Sidebar Trigger */}
         {/*CHANGE MENU ICON TO SVG !!! */}

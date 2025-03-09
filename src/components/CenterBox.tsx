@@ -2,6 +2,15 @@ import { useState } from "react";
 //import framer motion
 import { motion } from "framer-motion";
 
+//import toastify to help with creating pop up notifications
+import { Slide, ToastContainer, toast } from "react-toastify";
+
+//import the database so that it can be accessed through addDoc
+import { db } from "../config/firebase";
+
+//import addDoc function to add the completed tasks to the collection in the database
+import { addDoc, collection } from "firebase/firestore";
+
 //? Create an interface for the tasks added to the list
 interface Tasks {
   index: number;
@@ -9,7 +18,7 @@ interface Tasks {
   complete?: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
 }
 
-//Create an interface for the Completed Tasks list:
+//Create a referance to store the conection to the database
 
 export const CenterBox = () => {
   //create a toggle to help with the switch between the Active task section and the complete task section
@@ -61,6 +70,8 @@ export const CenterBox = () => {
 
       //^add the object to the empty array
       setStoredTask([...storedTasks, newTask]);
+      //^reset the input field
+      setGetTask(""); //may need to do some fixes to find solution to why the field doesn't rest
 
       //^increase the count on the indexU
       setIndexNumber(indexNumber + 1);
@@ -68,8 +79,6 @@ export const CenterBox = () => {
       //^alert the user that the input is empty if they want to add
       alert("Please enter a task...");
     }
-    //^reset the input field
-    setGetTask(""); //may need to do some fixes to find solution to why the field doesn't rest
   };
 
   //^Create a function to handle if a specific key is pressed and add an item to the list
@@ -104,7 +113,7 @@ export const CenterBox = () => {
   };
 
   //^ Create a function to add completed tasks an array
-  const addCompleteTask = (taskId: number) => {
+  const addCompleteTask = async (taskId: number) => {
     // The taskID is crutial when it comes to comparing one id from another list to the completed list
     const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //find whatever the index is in the array and giv it the value of the taskId
 
@@ -124,9 +133,29 @@ export const CenterBox = () => {
         { ...taskToComplete, complete: true },
       ]);
 
+      //?Sends the information to the database to house the completed tasks
+      const docRef = await addDoc(
+        collection(db, "Todo Collections"),
+        //adds the completed task object to the database's collection
+        completedTask
+      );
+      console.log(docRef);
+
+      //Make the notification pop up at the top of the page after a task is completed
+      toast.success("You Completed A Task", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Slide,
+      });
+
+      //console log for testing the functionality of the tasks getting added
       console.log(completedTask);
-    } else {
-      console.log(storedTasks, "hi");
     }
   };
 
@@ -134,6 +163,19 @@ export const CenterBox = () => {
 
   return (
     <div>
+      <ToastContainer
+        position="top-center"
+        autoClose={6000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Slide}
+      />
       <motion.div
         initial={{ scale: 0.9, y: 100, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
@@ -144,7 +186,7 @@ export const CenterBox = () => {
           bounce: 0.78,
           duration: 0.04,
         }}
-        className="flex flex-col"
+        className="flex flex-col z-[-2]"
       >
         <div className="flex flex-col justify-center items-center bg-[#3D3D3D] w-[550px] h-auto pt-[15px] rounded-[25px] pb-[5px]">
           <div className="flex justify-center items-center mb-[-10px]">
@@ -154,6 +196,7 @@ export const CenterBox = () => {
               placeholder="Add task..."
               onChange={retrieveTask}
               onKeyDown={handleEnter}
+              id="taskInput"
             />
             <motion.button
               initial={false}

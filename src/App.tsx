@@ -5,6 +5,7 @@ import { TodoPage } from "./pages/todo-page";
 import { Navbar } from "./components/Navbar";
 
 import HomePage from "./pages/home";
+import CompletedPage from "./pages/CompletedPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/todo" element={<TodoPage />} />
+        <Route path="/completed" element={<CompletedPage />} />
       </Routes>
     </>
   );
