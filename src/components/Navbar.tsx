@@ -25,24 +25,6 @@ export const Navbar: React.FC = () => {
   //create useNavigate to be able to route to the desired link
   const navigate = useNavigate();
 
-  //? useEffect(() => {
-  //?   localStorage.setItem("sidebarState", "false"); //create Json object to store the sidebarState as false by default oppon initial load
-  //? }, []);
-
-  //Create a function to check the local storage to check to for if the sidebar is open
-  //? useEffect(() => {
-  //?   const storedState = localStorage.getItem("sidebarState"); // tries to find if there is a saved state for the sidebarState , gets set to null if there is none
-  //?   if (storedState !== null) {
-  //?     //if the storedState is not null then:
-  //?     setSidebarOpen(JSON.parse(storedState)); // search local storage for for the state and sets the stored state to the saved false state by default
-  //?   }
-  //? }, []);
-
-  //Create another function to save the sidebar state to the local storage when it changes, whenever the sidebarOpen is triggerd using the use effect
-  //? useEffect(() => {
-  //?   localStorage.setItem("sidebarState", JSON.stringify(sidebarOpen));
-  //? }, [sidebarOpen]);
-
   //Imported Login function i made from login.ts file
   //Made a function that gives access to the user
   const RouteAccess = async () => {

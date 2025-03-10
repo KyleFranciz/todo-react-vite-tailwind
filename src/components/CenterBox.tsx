@@ -11,17 +11,24 @@ import { db } from "../config/firebase";
 //import addDoc function to add the completed tasks to the collection in the database
 import { addDoc, collection } from "firebase/firestore";
 
+import { useAuthState } from "react-firebase-hooks/auth";
+
+import { auth } from "../config/firebase";
+
 //? Create an interface for the tasks added to the list
 interface Tasks {
   index: number;
   text: string;
   complete?: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
+  userId?: string;
 }
 
 //Create a referance to store the conection to the database
+const todoRef = collection(db, "todo-collection");
 
 export const CenterBox = () => {
-  //create a toggle to help with the switch between the Active task section and the complete task section
+  //Create useAuthState to manage the user information on this page
+  const [user] = useAuthState(auth);
 
   //^create a useState to store the value from the input bar
   const [getTask, setGetTask] = useState<string>("");
@@ -66,6 +73,7 @@ export const CenterBox = () => {
         index: indexNumber, //pass a usedState that will icrement when the a new task is created
         text: getTask, // pass the text from the useState to be stored in the text parameter
         complete: false, // set to false by default wihtin the object will be changed individually later on
+        userId: user?.uid,
       };
 
       //^add the object to the empty array
@@ -96,6 +104,7 @@ export const CenterBox = () => {
         index: indexNumber, //pass a usedState that will icrement when the a new task is created
         text: getTask, // pass the text from the useState to be stored in the text parameter
         complete: false, // set to false by default wihtin the object will be changed individually later on
+        userId: user?.uid,
       };
 
       //^add the object to the empty array
@@ -133,13 +142,23 @@ export const CenterBox = () => {
         { ...taskToComplete, complete: true },
       ]);
 
-      //?Sends the information to the database to house the completed tasks
-      const docRef = await addDoc(
-        collection(db, "Todo Collections"),
-        //adds the completed task object to the database's collection
-        completedTask
-      );
-      console.log(docRef);
+      //destructure the object completed task
+      const [
+        {
+          index: completeIndex, //each is assigned
+          text: completedText,
+          complete: completeBoolean,
+          userId: completeId, //this is the users id that will give them acess to there document
+        },
+      ] = completedTask;
+
+      //pass the destructured code into the addDoc function to be passed to the data base
+      await addDoc(todoRef, {
+        index: completeIndex, //each of these will be passed into the document as indivitual objects
+        text: completedText, //each of these will be passed into the document as indivitual objects
+        complete: completeBoolean, //each of these will be passed into the document as indivitual objects
+        userId: completeId, //this is the users id that will give them acess to there document
+      }); // connects to the todo reference I made using the collection method
 
       //Make the notification pop up at the top of the page after a task is completed
       toast.success("You Completed A Task", {
