@@ -1,7 +1,14 @@
 import { WelcomeText } from "../components/WelcomeText";
+import {useAuthState} from "react-firebase-hooks/auth";
+import {auth} from "../config/firebase";
 
 export default function HomePage() {
-  //^ Make the user see different sides of the site uppon logged in /logged out
+  //^ Make the user see different sides of the site upon logged in /logged out
+  const [user] = useAuthState(auth);
+
+  const loggedIn = !!user;
+
+  //convert username to string to be passed into the text field
 
   return (
     <div className="pt-4 p-4 transform -translate-y-[-20px] flex flex-col items-center z-[-10] ">
@@ -16,7 +23,9 @@ export default function HomePage() {
             <WelcomeText text="CENTER." delayMulti={0.35} />
           </div>
         </div>
-        <div className=" mt-2.5">Placeholder</div>
+        { loggedIn && //if logged in then display the name of the user
+        <div className=" mt-2.5"><WelcomeText text={"name"} delayMulti={0.45} /></div>
+        }
       </div>
     </div>
   );
