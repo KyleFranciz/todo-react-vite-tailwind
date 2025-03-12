@@ -152,7 +152,7 @@ export const CenterBox = () => {
 
       //if the task id is found in the array then
       const taskToComplete = storedTasks[taskIndex]; //search the stored tasks using the index that is found in the
-      //stores the object inside of the variable
+      //stores the object inside the variable
 
       //update the list by filtering based on all the tasks that's id wasn't equal to the index:
       const updatedTodoList = storedTasks.filter(
