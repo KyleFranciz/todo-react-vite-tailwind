@@ -62,7 +62,7 @@ export const CenterBox = () => {
     // If the length of the list is greater than 7 then prevent the user from continuing
     if (storedTasks.length >= MaxTasks) {
       //clear the task first:
-      setGetTask("")
+      setGetTask("");
       //alert the user to finish the rest of what they have to do first before adding more
       alert("Finish the tasks that you have started first before continuing");
       return;
@@ -87,22 +87,18 @@ export const CenterBox = () => {
 
       //increase the count on the indexU
       setIndexNumber(indexNumber + 1);
-
-
     } else {
       //alert the user that the input is empty if they want to add
       alert("Please enter a task...");
     }
   };
 
-
-
   //Create a function to handle if the enter key is pressed
   const handleEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     //This is placed at the top as the first thing to check off the checklist after that the rest of the code can run
     if (storedTasks.length >= MaxTasks) {
       //clear the input
-      setGetTask("")
+      setGetTask("");
       //alert the user to finish the first few tasks that they assigned themselves to do:
       alert("Finish the tasks that you have started first before continuing");
       return;
@@ -121,7 +117,6 @@ export const CenterBox = () => {
       //add the object to the empty array
       setStoredTask([...storedTasks, newTask]);
 
-
       //reset the input of the task:
       setGetTask("");
 
@@ -132,11 +127,7 @@ export const CenterBox = () => {
     if (event.key === "Enter" && getTask.trim() === "") {
       alert("Please enter a task before we can continue");
     }
-
-
   };
-
-
 
   //add a counter to keep track of the indexes that are added to the complete list to display how many tasks were completed ( might use database instead )
 
@@ -144,84 +135,78 @@ export const CenterBox = () => {
   const addCompleteTask = async (taskId: number) => {
     //try to execute adding the data to the collection on firebase:
     try {
-    // The taskID is essential when it comes to comparing one id from another list to the completed list
-    const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //use the object in findIndex, searches through the array to see if each tasks index matches the taskId
+      // The taskID is essential when it comes to comparing one id from another list to the completed list
+      const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //use the object in findIndex, searches through the array to see if each tasks index matches the taskId
 
-    //if the index of the task is found then execute this function:
-    if (taskIndex !== -1) {
+      //if the index of the task is found then execute this function:
+      if (taskIndex !== -1) {
+        //if the task id is found in the array then
+        const taskToComplete = storedTasks[taskIndex]; //search the stored tasks using the index that is found in the
+        //stores the object inside the variable
 
-      //if the task id is found in the array then
-      const taskToComplete = storedTasks[taskIndex]; //search the stored tasks using the index that is found in the
-      //stores the object inside the variable
+        //update the list by filtering based on all the tasks that's id wasn't equal to the index:
+        const updatedTodoList = storedTasks.filter(
+          (task) => task.index !== taskId
+        ); //stores all the items from this list into the new updated list
 
-      //update the list by filtering based on all the tasks that's id wasn't equal to the index:
-      const updatedTodoList = storedTasks.filter(
-        (task) => task.index !== taskId
-      ); //stores all the items from this list into the new updated list
+        setStoredTask(updatedTodoList); // store all the items from the updated list into the stored tasks list so that it can be displayed
 
-      setStoredTask(updatedTodoList); // store all the items from the updated list into the stored tasks list so that it can be displayed
+        //update complete to true so that it saves in the database
+        taskToComplete.complete = true;
 
-      //update complete to true so that it saves in the database
-      taskToComplete.complete = true;
+        console.log("The completed task is : ", taskToComplete); // test to see the elements of the task being added
 
+        //destructure the object completed task
 
-      console.log("The completed task is : ",taskToComplete); // test to see the elements of the task being added
+        // pass the taskToComplete object pieces into the addDoc function to be passed into the database:
+        await addDoc(todoRef, {
+          ...taskToComplete, //passes all the parts of the object inside of task to complete into the add document function
+        }); // connects to the todo reference I made using the collection method
 
-      //destructure the object completed task
+        //increment the completed task by one so that the index is increased each time it's added to the database
 
+        //Make the notification pop up at the top of the page after a task is completed
+        toast.success("You Completed A Task", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Slide,
+        });
 
-      // pass the taskToComplete object pieces into the addDoc function to be passed into the database:
-      await addDoc(todoRef, {
-        index: taskToComplete.index, // passes the index of the task into the database
-        text: taskToComplete.text, //pass the text of the task into the database
-        complete: taskToComplete.complete , // pass the status of the task into the database
-        userId: taskToComplete.userId , // pass the userId into the database
-      }); // connects to the todo reference I made using the collection method
-
-      //increment the completed task by one so that the index is increased each time it's added to the database
-
-
-
-      //Make the notification pop up at the top of the page after a task is completed
-      toast.success("You Completed A Task", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Slide,
-      });
-
-      //console.log what was added to the list:
-      console.log("The tasks that was added to the completed list are : ",taskToComplete);
-
+        //console.log what was added to the list:
+        console.log(
+          "The tasks that was added to the completed list are : ",
+          taskToComplete
+        );
+      }
       //catch the error that happened if the data can't be added:
-    }} catch (error) {
+    } catch (error) {
       //log the error that was found
-      console.log("The error in the code is : ",error);
+      console.log("The error in the code is : ", error);
 
       //send the notification to toastify when an error occurs adding the object in the array to the database
-      toast.error("Unfortunately, there was an error adding the task to the database", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      })
+      toast.error(
+        "Unfortunately, there was an error adding the task to the database",
+        {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        }
+      );
     }
   };
 
   //create a function to delete the completed tasks from the completed list :
-
-
-
-
 
   //create a function to delete the tasks from the database on firebase :
   return (
@@ -254,15 +239,13 @@ export const CenterBox = () => {
         <div className="flex flex-col justify-center items-center bg-[#3D3D3D] w-[550px] h-auto pt-[15px] rounded-[25px] pb-[5px]">
           <div className="flex justify-center items-center mb-[-10px]">
             <input
-
               className="bg-[#a2a2a2] text-black rounded-4xl w-[450px] h-10 text-center font-black mr-[10px] font-[inter] focus:outline-none "
               type="text"
               placeholder="Add task..."
               onChange={retrieveTask}
               onKeyDown={handleEnter}
               //set value to the useState that stores the input that is entered, that way i can clear it later:
-                value={getTask}
-
+              value={getTask}
             />
             <motion.button
               initial={false}

@@ -1,6 +1,6 @@
 import { WelcomeText } from "../components/WelcomeText";
-import {useAuthState} from "react-firebase-hooks/auth";
-import {auth} from "../config/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../config/firebase";
 
 export default function HomePage() {
   //^ Make the user see different sides of the site upon logged in /logged out
@@ -18,14 +18,16 @@ export default function HomePage() {
             <WelcomeText text="WELCOME" delayMulti={0.1} />
             <WelcomeText text="TO" delayMulti={0.2} />
           </div>
-          <div className="flex flex-col w-[605px] text-[1.5rem] z-[-10] ">
+          <div className="flex flex-col w-[605px] text-[1.5rem] z-[-10] mb-0">
             <WelcomeText text="FOCUS" delayMulti={0.25} />
             <WelcomeText text="CENTER." delayMulti={0.35} />
           </div>
         </div>
-        { loggedIn && //if logged in then display the name of the user
-        <div className=" mt-2.5"><WelcomeText text={"name"} delayMulti={0.45} /></div>
-        }
+        {loggedIn && ( //if logged in then display the name of the user
+          <div className=" mt-[-15px] font-inter font-semibold">
+            <WelcomeText text={"Blase"} delayMulti={0.65} />
+          </div>
+        )}
       </div>
     </div>
   );
