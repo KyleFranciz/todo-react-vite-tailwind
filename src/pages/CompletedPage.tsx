@@ -1,17 +1,84 @@
 import { auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useEffect, useState } from "react";
+//import query , collection, where and getDocs
+import { query, where, collection, getDocs } from "firebase/firestore";
+//import db so that i have access to the database
+import { db } from "../config/firebase";
+import { motion } from "framer-motion";
 
 export default function CompletedPage() {
+  //? Create an interface for the tasks added to the list
+  interface Tasks {
+    id: string;
+    index: number;
+    text: string;
+    complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
+    userId?: string;
+  }
+
+  //Create a useState to store the task data retrieved inside of the state
+  const [displayedTasks, setDisplayedTasks] = useState<Tasks[] | null>([]);
+
   //Authenticate the users access to the page
   const [user] = useAuthState(auth);
 
-  return (
-    <div className=" p-4 transform -translate-y-[-20px] h-full flex justify-center items-center">
-      {user ? (
-        <div className="text-black">This is the completed task page</div>
-      ) : (
-        <div>You cannot access this page until you login</div>
-      )}
-    </div>
-  );
+  //Create a connection to the database to import all the tasks data that is true: ( complete: true )
+
+  const completedTaskQuery = query(
+    collection(db, "completed-collection"),
+    where("complete", "==", true)
+  ); //check the completed-collection database and filter out the tasks that are true: ( complete: true ) so that they can be displayed on the screen
+
+  //create a const to house the data that we retrieve from the collection and store it in the const so that it can be displayed
+  const getCompletedTasks = async () => {
+    try {
+      //use get docs to fetch all the documents from the collection
+      const data = await getDocs(completedTaskQuery);
+      setDisplayedTasks(
+        data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Tasks[]
+      ); // all the documents will be stored in the variable
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getCompletedTasks();
+  }, []);
+
+  //if the user is not logged in, then display the message "You cannot access this page until you login"
+  if (!user) {
+    return <div>You cannot access this page until you login</div>;
+  } else {
+    return (
+      <div className="flex flex-col mt-14">
+        <p className="text-[2rem] font-extrabold font-inter mb-5">
+          COMPLETED TASKS
+        </p>
+        {/*Create a container for the completed tasks to be diaplayed */}
+        <div>
+          <div>
+            {displayedTasks?.map((tasks) =>
+              //if there is are tasks then then display the block
+              tasks.text ? (
+                //Display the tasks text to the user so they can see a list of all the tasks they completed
+
+                <motion.div
+                  initial={{ opacity: 0, y: 100 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="bg-black w-[800px] h-[60px] text-white rounded-2xl mt-[8px] flex justify-center items-center font-bold"
+                >
+                  <li className="list-none">{tasks.text}</li>
+                </motion.div>
+              ) : (
+                //if there are no task then display nothing
+                ""
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
