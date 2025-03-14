@@ -1,6 +1,6 @@
 import { auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 //import query , collection, where and getDocs
 import { query, where, collection, getDocs } from "firebase/firestore";
 //import db so that i have access to the database
@@ -23,29 +23,37 @@ export default function CompletedPage() {
   //Authenticate the users access to the page
   const [user] = useAuthState(auth);
 
-  //Create a connection to the database to import all the tasks data that is true: ( complete: true )
+  //because the user can be null I have to make sure the user is authenticated before even running the bellow code
+  if (user) {
+    // store the useId
+    const userId = user?.uid;
 
-  const completedTaskQuery = query(
-    collection(db, "completed-collection"),
-    where("complete", "==", true)
-  ); //check the completed-collection database and filter out the tasks that are true: ( complete: true ) so that they can be displayed on the screen
+    //Create a connection to the database to import all the tasks data that is true: ( complete: true )
 
-  //create a const to house the data that we retrieve from the collection and store it in the const so that it can be displayed
-  const getCompletedTasks = async () => {
-    try {
-      //use get docs to fetch all the documents from the collection
-      const data = await getDocs(completedTaskQuery);
-      setDisplayedTasks(
-        data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Tasks[]
-      ); // all the documents will be stored in the variable
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    const completedTaskQuery = query(
+      collection(db, "completed-collection"),
+      where("complete", "==", true),
+      where("userId", "==", userId)
+    ); //check the completed-collection database and filter out the tasks that are true: ( complete: true ) so that they can be displayed on the screen
 
-  useEffect(() => {
+    //create a const to house the data that we retrieve from the collection and store it in the const so that it can be displayed
+    const getCompletedTasks = async () => {
+      try {
+        //use get docs to fetch all the documents from the collection
+        const data = await getDocs(completedTaskQuery);
+        setDisplayedTasks(
+          data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Tasks[]
+        ); // all the documents will be stored in the variable
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     getCompletedTasks();
-  }, []);
+    //useEffect(() => {
+    //  getCompletedTasks();
+    //}, []);
+  }
 
   //if the user is not logged in, then display the message "You cannot access this page until you login"
   if (!user) {

@@ -24,8 +24,8 @@ export default function HomePage() {
           </div>
         </div>
         {loggedIn && ( //if logged in then display the name of the user
-          <div className=" mt-[-15px] font-inter font-semibold">
-            <WelcomeText text={"Blase"} delayMulti={0.65} />
+          <div className=" mt-[-10px] font-inter font-bold">
+            <WelcomeText text={user.displayName} delayMulti={0.45} />
           </div>
         )}
       </div>

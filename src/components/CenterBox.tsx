@@ -20,7 +20,7 @@ interface Tasks {
   index: number;
   text: string;
   complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
-  userId?: string;
+  userId?: string | null;
 }
 
 //Create a reference to store the connection to the database
