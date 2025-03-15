@@ -43,7 +43,7 @@ export default function CompletedPage() {
         const data = await getDocs(completedTaskQuery);
         setDisplayedTasks(
           data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Tasks[]
-        ); // all the documents will be stored in the variable
+        ); // all the documents will be stored in the state
       } catch (error) {
         console.log(error);
       }
