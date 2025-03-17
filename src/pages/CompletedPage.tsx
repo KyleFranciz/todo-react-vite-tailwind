@@ -2,7 +2,14 @@ import { auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
 //import query , collection, where and getDocs
-import { query, where, collection, getDocs } from "firebase/firestore";
+import {
+  query,
+  where,
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 //import db so that i have access to the database
 import { db } from "../config/firebase";
 import { motion } from "framer-motion";
@@ -36,6 +43,8 @@ export default function CompletedPage() {
       where("userId", "==", userId)
     ); //check the completed-collection database and filter out the tasks that are true: ( complete: true ) so that they can be displayed on the screen
 
+    //Create task query that doesnt ==
+
     //create a const to house the data that we retrieve from the collection and store it in the const so that it can be displayed
     const getCompletedTasks = async () => {
       try {
@@ -54,6 +63,13 @@ export default function CompletedPage() {
     //  getCompletedTasks();
     //}, []);
   }
+
+  //Create a function that clears the task from the list as well as removes it from the database:
+  const clearComplete = (docId: string) => {
+    // plug in the connection to the database in the delete function
+    // Just deleting one document from the database
+    deleteDoc(doc(db, "completed-collection", docId)); // pass the paramerter into the function. should be able to pass the document id into the function to delete the document
+  };
 
   //if the user is not logged in, then display the message "You cannot access this page until you login"
   if (!user) {
@@ -75,9 +91,15 @@ export default function CompletedPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 100 }}
                   animate={{ y: 0, opacity: 1 }}
-                  className="bg-black w-[800px] h-[60px] text-white rounded-2xl mt-[8px] flex justify-center items-center font-bold"
+                  className="bg-[#313131] w-[800px] h-[60px] text-white rounded-2xl mt-[8px] flex justify-center items-center font-bold relative"
                 >
                   <li className="list-none">{tasks.text}</li>
+                  <button
+                    className="absolute right-6 bg-[#161616] px-4.5 py-[4px] rounded-[5px]"
+                    onClick={clearComplete(tasks.id)}
+                  >
+                    clear
+                  </button>
                 </motion.div>
               ) : (
                 //if there are no task then display nothing
