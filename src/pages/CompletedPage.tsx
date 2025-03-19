@@ -1,16 +1,22 @@
 import { auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useState } from "react";
+import React, { useState } from "react";
 //import query , collection, where and getDocs
 import { query, where, collection, getDocs } from "firebase/firestore";
 //import db so that I have access to the database
 import { db } from "../config/firebase";
 import { motion } from "framer-motion";
+import { DocInfo } from "./todo-page";
 
-export default function CompletedPage() {
+//Define the prop that is going to be passed into the function
+interface DocInfoProp {
+  info: DocInfo;
+}
+
+export const CompletedPage: React.FC<DocInfoProp> = ({ info }) => {
   //? Create an interface for the tasks added to the list
   interface Tasks {
-    id: string;
+    DocId: string;
     index: number;
     text: string;
     complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
@@ -44,7 +50,7 @@ export default function CompletedPage() {
         //use get docs to fetch all the documents from the collection
         const data = await getDocs(completedTaskQuery);
         setDisplayedTasks(
-          data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Tasks[]
+          data.docs.map((doc) => ({ ...doc.data(), DocId: doc.id })) as Tasks[]
         ); // all the documents will be stored in the state
       } catch (error) {
         console.log(error);
@@ -96,4 +102,4 @@ export default function CompletedPage() {
       </div>
     );
   }
-}
+};

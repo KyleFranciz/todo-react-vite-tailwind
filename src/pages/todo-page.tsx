@@ -4,9 +4,13 @@ import { db } from "../config/firebase";
 import { useState } from "react";
 
 //create an interface to house the neccessary data
-interface DocInfo {
-  id: string;
-  //fill out the rest of the info from the doc
+export interface DocInfo {
+  //make same layout as the firebase interface
+  DocId: string;
+  index: number;
+  text: string;
+  complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
+  userId?: string;
 }
 //make sure the info matches the doc properties so that it can house the info properly
 export const TodoPage = () => {
@@ -23,7 +27,10 @@ export const TodoPage = () => {
       const data = await getDocs(collectionRef);
       //map through the data
       setGrabDocInfo(
-        data.docs.map((docInfo) => ({ ...docInfo.data(), id: docInfo.id }))
+        data.docs.map((docInfo) => ({
+          ...docInfo.data(),
+          DocId: docInfo.id,
+        })) as DocInfo[] // give data retrieved the same structure as the interface
       );
     } catch (error) {
       console.log(error);
@@ -35,7 +42,7 @@ export const TodoPage = () => {
 
   return (
     <div className=" p-4 transform -translate-y-[-20px] h-full flex justify-center items-center">
-      <CenterBox />
+      <CenterBox info={} />
     </div>
   );
 };

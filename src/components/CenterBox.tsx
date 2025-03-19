@@ -21,7 +21,7 @@ interface Tasks {
   text: string;
   complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
   userId?: string | null;
-  docId?: string | undefined; //should just be a string so to make sure that each task has their own unique ID
+  DocId?: string | undefined; //should just be a string so to make sure that each task has their own unique ID
   //postID is added on after the task is added getting added to the database
 }
 
