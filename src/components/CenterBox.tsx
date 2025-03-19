@@ -21,14 +21,19 @@ interface Tasks {
   text: string;
   complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
   userId?: string | null;
+  docId?: string | undefined; //should just be a string so to make sure that each task has their own unique ID
+  //postID is added on after the task is added getting added to the database
 }
 
 //Create a reference to store the connection to the database
 const todoRef = collection(db, "completed-collection");
 
+//! pass a prop inside that i can use to add into one of the functions to add the task to the database
 export const CenterBox = () => {
   //Create useAuthState to manage the user information on this page
   const [user] = useAuthState(auth);
+
+  //store the documents that I grab from the server:
 
   //create a useState to store the value from the input bar
   const [getTask, setGetTask] = useState<string>("");
@@ -42,7 +47,7 @@ export const CenterBox = () => {
 
   //Task interface has the tasks and completed that are stored in each iteration, since they have the same parameters
 
-  //create a variable to handle the maximum amount of tasks
+  //create a variable to handle the maximum 7 of tasks
   const MaxTasks: number = 7;
 
   //create a function that stores the data from the input into the state
@@ -59,7 +64,7 @@ export const CenterBox = () => {
   const storeAllTasks = () => {
     // (This is placed at the top as the first thing to check off the checklist after that the rest of the code can run)
 
-    // If the length of the list is greater than 7 then prevent the user from continuing
+    // If the length of the list is greater than 7, then prevent the user from continuing
     if (storedTasks.length >= MaxTasks) {
       //clear the task first:
       setGetTask("");
@@ -68,11 +73,11 @@ export const CenterBox = () => {
       return;
     }
     //activate the function when the button is clicked
-    //make an if statement that tracks if the input field is not empty, if not then we add it to the array
+    //make an if statement that tracks if the input field is not empty, if not, then we add it to the array
     if (getTask.trim() !== "") {
       //? Create the object that houses all the parameters for the data that I'll use
       const newTask: Tasks = {
-        // Task interface is passed to the object so that errors will be raised if the required fields aren't met
+        // The Task interface is passed to the object so that errors will be raised if the required fields aren't met
         index: indexNumber, //pass a usedState that will increment when a new task is created
         text: getTask, // pass the text from the useState to be stored in the text parameter
         complete: false, // set to false by default within the object will be changed individually later on
@@ -95,7 +100,7 @@ export const CenterBox = () => {
 
   //Create a function to handle if the enter key is pressed
   const handleEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    //This is placed at the top as the first thing to check off the checklist after that the rest of the code can run
+    //This is placed at the top as the first thing to check off the checklist after so the rest of the code can run
     if (storedTasks.length >= MaxTasks) {
       //clear the input
       setGetTask("");
@@ -103,11 +108,11 @@ export const CenterBox = () => {
       alert("Finish the tasks that you have started first before continuing");
       return;
     }
-    //if the enter key is pressed and the input is not empty then add the item to the list
+    //if the enter key is pressed and the input is not empty, add the item to the list
     if (event.key === "Enter" && getTask.trim() !== "") {
       //? Create the object that houses all the parameters for the data that I'll use
       const newTask: Tasks = {
-        // Task interface is passed to the object so that errors will be raised if the required fields aren't met
+        // The Task interface is passed to the object so that errors will be raised if the required fields aren't met
         index: indexNumber, //pass a usedState that will increment when a new task is created
         text: getTask, // pass the text from the useState to be stored in the text parameter
         complete: false, // set to false by default within the object will be changed individually later on
@@ -129,16 +134,16 @@ export const CenterBox = () => {
     }
   };
 
-  //add a counter to keep track of the indexes that are added to the complete list to display how many tasks were completed ( might use database instead )
+  //add a counter to keep track of the indexes that are added to the complete list to display how many tasks were completed (might use a database instead)
 
   // Create a function to add completed tasks an array
   const addCompleteTask = async (taskId: number) => {
     //try to execute adding the data to the collection on firebase:
     try {
       // The taskID is essential when it comes to comparing one id from another list to the completed list
-      const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //use the object in findIndex, searches through the array to see if each tasks index matches the taskId
+      const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //use the object in findIndex, searches through the array to see if each task index matches the taskId
 
-      //if the index of the task is found then execute this function:
+      //if the index of the task is found, then execute this function:
       if (taskIndex !== -1) {
         //if the task id is found in the array then
         const taskToComplete = storedTasks[taskIndex]; //search the stored tasks using the index that is found in the
@@ -148,19 +153,27 @@ export const CenterBox = () => {
         const updatedTodoList = storedTasks.filter(
           (task) => task.index !== taskId
         ); //stores all the items from this list into the new updated list
+        //removes the task that ID matches the index from the list
 
         setStoredTask(updatedTodoList); // store all the items from the updated list into the stored tasks list so that it can be displayed
+        //refreshes the task list once the list has been filtered
 
         //update complete to true so that it saves in the database
-        taskToComplete.complete = true;
+        taskToComplete.complete = true; //set the index of the task to complete to true
+
+        //when a new task is added, make sure that postID of the task is also saved as part of the doc.
 
         console.log("The completed task is : ", taskToComplete); // test to see the elements of the task being added
 
-        //destructure the object completed task
+        //create an auto generated document for each task
 
         // pass the taskToComplete object pieces into the addDoc function to be passed into the database:
         await addDoc(todoRef, {
-          ...taskToComplete, //passes all the parts of the object inside of task to complete into the add document function
+          //pass the document ID to the database
+          ...taskToComplete,
+
+          //add a new attribute to the task being sent to the database, make postId able to help w tracking each post differently
+          //passes all the parts of the object inside the task to complete into the add document function
         }); // connects to the todo reference I made using the collection method
 
         //increment the completed task by one so that the index is increased each time it's added to the database
