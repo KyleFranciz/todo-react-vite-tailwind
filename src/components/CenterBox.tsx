@@ -9,7 +9,7 @@ import { Slide, ToastContainer, toast } from "react-toastify";
 import { db } from "../config/firebase";
 
 //import addDoc function to add the completed tasks to the collection in the database
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -21,7 +21,7 @@ interface Tasks {
   text: string;
   complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
   userId?: string | null;
-  docId?: string | undefined; //should just be a string so to make sure that each task has their own unique ID
+  docId: string; //should just be a string so to make sure that each task has their own unique ID
   //postID is added on after the task is added getting added to the database
 }
 
@@ -33,7 +33,13 @@ export const CenterBox = () => {
   //Create useAuthState to manage the user information on this page
   const [user] = useAuthState(auth);
 
-  //store the documents that I grab from the server:
+  //create query to use the collectionRef to grab the info
+  const currentTaskQuerry = query(
+    collection(db, "completed-collection"),
+    //only get info for tasks that arent complete
+    where("complete", "==", false),
+    where("usedId", "==", user?.uid)
+  );
 
   //create a useState to store the value from the input bar
   const [getTask, setGetTask] = useState<string>("");
@@ -82,10 +88,31 @@ export const CenterBox = () => {
         text: getTask, // pass the text from the useState to be stored in the text parameter
         complete: false, // set to false by default within the object will be changed individually later on
         userId: user?.uid,
+        docId: "",
       };
 
       //add the task object to the empty array
       setStoredTask([...storedTasks, newTask]);
+
+      //! use the addDoc function to add the document to the collection
+
+      //use the getDocs to get all the documents that complete == to false and store them in the setStoredTask
+      //if (user) {
+      //  const fetchCurrentTasks = async () => {
+      //    try {
+      //      const data = await getDocs(currentTaskQuerry);
+      //      setStoredTask(
+      //        data.docs.map((info) => ({
+      //          ...info.data,
+      //          docId: info.id,
+      //        })) as Tasks[]
+      //      );
+      //    } catch (error) {
+      //      console.log(error);
+      //    }
+      //  };
+      //  fetchCurrentTasks();
+      //}
 
       //clear the input state so that the input field is cleared:
       setGetTask("");
@@ -117,10 +144,32 @@ export const CenterBox = () => {
         text: getTask, // pass the text from the useState to be stored in the text parameter
         complete: false, // set to false by default within the object will be changed individually later on
         userId: user?.uid,
+        docId: "",
       };
 
       //add the object to the empty array
       setStoredTask([...storedTasks, newTask]);
+
+      //! use the addDoc function to add the document to the collection
+
+      //if (user) {
+      //  //use the getDocs to get all the documents that complete == to false and store them in the setStoredTask
+      //  const fetchCurrentTasks = async () => {
+      //    try {
+      //      const data = await getDocs(currentTaskQuerry);
+      //      setStoredTask(
+      //        data.docs.map((info) => ({
+      //          ...info.data,
+      //          docId: info.id,
+      //        })) as Tasks[]
+      //      );
+      //    } catch (error) {
+      //      console.log(error);
+      //    }
+      //  };
+      //
+      //  fetchCurrentTasks();
+      //}
 
       //reset the input of the task:
       setGetTask("");
@@ -137,7 +186,7 @@ export const CenterBox = () => {
   //add a counter to keep track of the indexes that are added to the complete list to display how many tasks were completed (might use a database instead)
 
   // Create a function to add completed tasks an array
-  const addCompleteTask = async (taskId: number) => {
+  const addCompleteTask = async (taskId: number, documentId: string) => {
     //try to execute adding the data to the collection on firebase:
     try {
       // The taskID is essential when it comes to comparing one id from another list to the completed list
@@ -171,7 +220,7 @@ export const CenterBox = () => {
         await addDoc(todoRef, {
           //pass the document ID to the database
           ...taskToComplete,
-          docId: todoRef.id,
+          docId: documentId,
 
           //add a new attribute to the task being sent to the database, make postId able to help w tracking each post differently
           //passes all the parts of the object inside the task to complete into the add document function
@@ -287,7 +336,7 @@ export const CenterBox = () => {
                     x
                   </button>
                   <button
-                    onClick={() => addCompleteTask(tasks.index)}
+                    onClick={() => addCompleteTask(tasks.index, tasks.docId)}
                     className="flex justify-center items-center rounded-[30px] absolute right-10 w-[30px] h-[30px] bg-[#131313] hover:bg-[#1c1b1b]"
                   >
                     ✓
