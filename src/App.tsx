@@ -7,9 +7,12 @@ import { Navbar } from "./components/Navbar";
 import HomePage from "./pages/home";
 import { CompletedPage } from "./pages/CompletedPage";
 
-//Create an interface to
+//Create a global interface so that I can pass the info needed into the component element
 
 function App() {
+  //create a connection to the collection
+
+  //use the getDocs function to get an array of objects that have all the information from the docs
   return (
     <>
       <div className="fixed">

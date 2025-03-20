@@ -21,7 +21,7 @@ interface Tasks {
   text: string;
   complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
   userId?: string | null;
-  DocId?: string | undefined; //should just be a string so to make sure that each task has their own unique ID
+  docId?: string | undefined; //should just be a string so to make sure that each task has their own unique ID
   //postID is added on after the task is added getting added to the database
 }
 
@@ -171,6 +171,7 @@ export const CenterBox = () => {
         await addDoc(todoRef, {
           //pass the document ID to the database
           ...taskToComplete,
+          docId: todoRef.id,
 
           //add a new attribute to the task being sent to the database, make postId able to help w tracking each post differently
           //passes all the parts of the object inside the task to complete into the add document function

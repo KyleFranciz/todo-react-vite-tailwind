@@ -2,7 +2,14 @@ import { auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
 //import query , collection, where and getDocs
-import { query, where, collection, getDocs } from "firebase/firestore";
+import {
+  query,
+  where,
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 //import db so that I have access to the database
 import { db } from "../config/firebase";
 import { motion } from "framer-motion";
@@ -12,7 +19,7 @@ import { motion } from "framer-motion";
 export const CompletedPage = () => {
   //? Create an interface for the tasks added to the list
   interface Tasks {
-    DocId: string;
+    docId: string;
     index: number;
     text: string;
     complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
@@ -20,7 +27,7 @@ export const CompletedPage = () => {
   }
 
   //Create a useState to store the task data retrieved inside of the state
-  const [displayedTasks, setDisplayedTasks] = useState<Tasks[] | null>([]);
+  const [displayedTasks, setDisplayedTasks] = useState<Tasks[]>([]);
 
   //Authenticate the users access to the page
   const [user] = useAuthState(auth);
@@ -44,20 +51,37 @@ export const CompletedPage = () => {
     const getCompletedTasks = async () => {
       try {
         //use get docs to fetch all the documents from the collection
-        const data = await getDocs(completedTaskQuery);
+        const docData = await getDocs(completedTaskQuery);
         setDisplayedTasks(
-          data.docs.map((doc) => ({ ...doc.data(), DocId: doc.id })) as Tasks[]
+          docData.docs.map((doc) => ({
+            ...doc.data(),
+            docId: doc.id,
+          })) as Tasks[]
         ); // all the documents will be stored in the state
       } catch (error) {
         console.log(error);
       }
     };
-
     getCompletedTasks();
-    //useEffect(() => {
-    //  getCompletedTasks();
-    //}, []);
+    //create a function to delete the task from the list:
   }
+
+  const deleteCompletedTask = async (docId: string) => {
+    //make a try catch block to make the attempt:
+    try {
+      //use the deleteDoc function to search through and find the doc to delete
+      //pass in the docid from the feteched documents and the individual documents id
+      await deleteDoc(doc(db, "completed-collection", docId))
+        .then(() => {
+          console.log("Completed task has been cleared");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   //Create a function that clears the task from the list as well as removes it from the database:
 
@@ -73,25 +97,39 @@ export const CompletedPage = () => {
         {/*Create a container for the completed tasks to be displayed */}
         <div>
           <div>
-            {displayedTasks?.map((tasks) =>
-              //if there are tasks then display the block
-              tasks.text ? (
-                //Display the task text to the user so they can see a list of all the tasks they completed
+            {/*If the length of the displayedTask array is empty then let the user know there are no more tasks */}
+            {displayedTasks?.length > 0 ? (
+              displayedTasks?.map((tasks) =>
+                //if there are tasks then display the block
+                tasks.text ? (
+                  //Display the task text to the user so they can see a list of all the tasks they completed
 
-                <motion.div
-                  initial={{ opacity: 0, y: 100 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  className="bg-[#313131] w-[800px] h-[60px] text-white rounded-2xl mt-[8px] flex justify-center items-center font-bold relative"
-                >
-                  <li className="list-none">{tasks.text}</li>
-                  <button className="absolute right-6 bg-[#161616] px-4.5 py-[4px] rounded-[5px]">
-                    clear
-                  </button>
-                </motion.div>
-              ) : (
-                //if there is no task then display nothing
-                ""
+                  <motion.div
+                    initial={{ opacity: 0, y: 100 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="bg-[#313131] w-[800px] h-[60px] text-white rounded-2xl mt-[8px] flex justify-center items-center font-bold relative"
+                  >
+                    <li className="list-none">{tasks.text}</li>
+                    <button
+                      className="absolute right-6 bg-[#161616] px-4.5 py-[4px] rounded-[5px]"
+                      onClick={() => deleteCompletedTask(tasks.docId)}
+                    >
+                      clear
+                    </button>
+                  </motion.div>
+                ) : (
+                  //if there is no task then display nothing
+                  ""
+                )
               )
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="bg-[#313131] w-[800px] h-[60px] text-white rounded-2xl mt-[8px] flex justify-center items-center font-bold relative"
+              >
+                There are no more tasks...
+              </motion.div>
             )}
           </div>
         </div>
