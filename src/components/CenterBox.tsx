@@ -34,12 +34,12 @@ export const CenterBox = () => {
   const [user] = useAuthState(auth);
 
   //create query to use the collectionRef to grab the info
-  const currentTaskQuerry = query(
-    collection(db, "completed-collection"),
-    //only get info for tasks that arent complete
-    where("complete", "==", false),
-    where("usedId", "==", user?.uid)
-  );
+  //const currentTaskQuerry = query(
+  //  collection(db, "completed-collection"),
+  //  //only get info for tasks that arent complete
+  //  where("complete", "==", false),
+  //  where("usedId", "==", user?.uid)
+  //);
 
   //create a useState to store the value from the input bar
   const [getTask, setGetTask] = useState<string>("");
