@@ -5,7 +5,9 @@ import { TodoPage } from "./pages/todo-page";
 import { Navbar } from "./components/Navbar";
 
 import HomePage from "./pages/home";
-import CompletedPage from "./pages/CompletedPage";
+import { CompletedPage } from "./pages/CompletedPage";
+
+//Create an interface to
 
 function App() {
   return (

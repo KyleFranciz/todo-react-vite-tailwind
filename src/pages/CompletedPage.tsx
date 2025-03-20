@@ -1,19 +1,15 @@
 import { auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import React, { useState } from "react";
+import { useState } from "react";
 //import query , collection, where and getDocs
 import { query, where, collection, getDocs } from "firebase/firestore";
 //import db so that I have access to the database
 import { db } from "../config/firebase";
 import { motion } from "framer-motion";
-import { DocInfo } from "./todo-page";
 
 //Define the prop that is going to be passed into the function
-interface DocInfoProp {
-  info: DocInfo;
-}
 
-export const CompletedPage: React.FC<DocInfoProp> = ({ info }) => {
+export const CompletedPage = () => {
   //? Create an interface for the tasks added to the list
   interface Tasks {
     DocId: string;
