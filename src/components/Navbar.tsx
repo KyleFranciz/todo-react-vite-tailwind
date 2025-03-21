@@ -9,7 +9,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../config/firebase";
 import { LoginUser } from "../functions/login";
 import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 //!import { useGoDestination } from "../functions/login"; (work on this hook the it causes glitches when redirection on login/logout)
 
 export const Navbar: React.FC = () => {
@@ -97,14 +97,13 @@ export const Navbar: React.FC = () => {
         >
           <ul className="flex mt-[100px] flex-col h-fit w-full bg-[#3D3D3D] ">
             {SidebarText.map((menuItems) => (
-              <li className="w-full pt-[20px] pb-[20px] list-none  hover:bg-[#292929] cursor-pointer">
-                <a
-                  className="text-white font-[inter] font-medium  text-[1.1rem]"
-                  href={menuItems.link}
-                >
-                  {menuItems.text}
-                </a>
-              </li>
+              <Link
+                className="text-white font-[inter] font-medium  text-[1.1rem] w-full pt-[20px] pb-[20px] list-none  hover:bg-[#292929] cursor-pointe"
+                to={menuItems.link}
+              >
+                {" "}
+                {menuItems.text}
+              </Link>
             ))}
           </ul>
         </motion.div>

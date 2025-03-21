@@ -9,7 +9,7 @@ import { Slide, ToastContainer, toast } from "react-toastify";
 import { db } from "../config/firebase";
 
 //import addDoc function to add the completed tasks to the collection in the database
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -21,7 +21,8 @@ interface Tasks {
   text: string;
   complete: boolean; //! Made optional so, add back later to help with compiling the completed task into a list
   userId?: string | null;
-  docId: string; //should just be a string so to make sure that each task has their own unique ID
+  docId: string;
+  //should just be a string so to make sure that each task has their own unique ID
   //postID is added on after the task is added getting added to the database
 }
 
@@ -32,14 +33,6 @@ const todoRef = collection(db, "completed-collection");
 export const CenterBox = () => {
   //Create useAuthState to manage the user information on this page
   const [user] = useAuthState(auth);
-
-  //create query to use the collectionRef to grab the info
-  //const currentTaskQuerry = query(
-  //  collection(db, "completed-collection"),
-  //  //only get info for tasks that arent complete
-  //  where("complete", "==", false),
-  //  where("usedId", "==", user?.uid)
-  //);
 
   //create a useState to store the value from the input bar
   const [getTask, setGetTask] = useState<string>("");
@@ -66,8 +59,12 @@ export const CenterBox = () => {
     setStoredTask(storedTasks.filter((tasks) => tasks.index !== index));
   };
 
-  //create function to store the getTask in:
-  const storeAllTasks = () => {
+  //!create a function to fetch all the data from the collection that matches the user
+  //!only fetch when completed : false, and user : useer.uid
+  //!use useEffect to make sure the function only renders once
+
+  //create function to store the getTask in: (make the function async because theres data that has to wait completing before continuing the rest of the code)
+  const storeAllTasks = async () => {
     // (This is placed at the top as the first thing to check off the checklist after that the rest of the code can run)
 
     // If the length of the list is greater than 7, then prevent the user from continuing
@@ -91,28 +88,9 @@ export const CenterBox = () => {
         docId: "",
       };
 
-      //add the task object to the empty array
-      setStoredTask([...storedTasks, newTask]);
-
       //! use the addDoc function to add the document to the collection
 
-      //use the getDocs to get all the documents that complete == to false and store them in the setStoredTask
-      //if (user) {
-      //  const fetchCurrentTasks = async () => {
-      //    try {
-      //      const data = await getDocs(currentTaskQuerry);
-      //      setStoredTask(
-      //        data.docs.map((info) => ({
-      //          ...info.data,
-      //          docId: info.id,
-      //        })) as Tasks[]
-      //      );
-      //    } catch (error) {
-      //      console.log(error);
-      //    }
-      //  };
-      //  fetchCurrentTasks();
-      //}
+      await addDoc(todoRef, newTask);
 
       //clear the input state so that the input field is cleared:
       setGetTask("");
@@ -126,7 +104,7 @@ export const CenterBox = () => {
   };
 
   //Create a function to handle if the enter key is pressed
-  const handleEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleEnter = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     //This is placed at the top as the first thing to check off the checklist after so the rest of the code can run
     if (storedTasks.length >= MaxTasks) {
       //clear the input
@@ -148,28 +126,9 @@ export const CenterBox = () => {
       };
 
       //add the object to the empty array
-      setStoredTask([...storedTasks, newTask]);
 
       //! use the addDoc function to add the document to the collection
-
-      //if (user) {
-      //  //use the getDocs to get all the documents that complete == to false and store them in the setStoredTask
-      //  const fetchCurrentTasks = async () => {
-      //    try {
-      //      const data = await getDocs(currentTaskQuerry);
-      //      setStoredTask(
-      //        data.docs.map((info) => ({
-      //          ...info.data,
-      //          docId: info.id,
-      //        })) as Tasks[]
-      //      );
-      //    } catch (error) {
-      //      console.log(error);
-      //    }
-      //  };
-      //
-      //  fetchCurrentTasks();
-      //}
+      await addDoc(todoRef, newTask);
 
       //reset the input of the task:
       setGetTask("");
@@ -193,7 +152,7 @@ export const CenterBox = () => {
       const taskIndex = storedTasks.findIndex((task) => task.index === taskId); //use the object in findIndex, searches through the array to see if each task index matches the taskId
 
       //if the index of the task is found, then execute this function:
-      if (taskIndex !== -1) {
+      if (taskIndex !== -1 && user) {
         //if the task id is found in the array then
         const taskToComplete = storedTasks[taskIndex]; //search the stored tasks using the index that is found in the
         //stores the object inside the variable
@@ -217,6 +176,8 @@ export const CenterBox = () => {
         //create an auto generated document for each task
 
         // pass the taskToComplete object pieces into the addDoc function to be passed into the database:
+        // ^? Change to setDoc function for the overide, onlything that is needed is the documentID that we can get when we initially fetch the data
+        //? We can get the docId  from the add doc function to include the data
         await addDoc(todoRef, {
           //pass the document ID to the database
           ...taskToComplete,
@@ -246,6 +207,8 @@ export const CenterBox = () => {
           "The tasks that was added to the completed list are : ",
           taskToComplete
         );
+      } else {
+        alert("Please log in to keep track of your completed tasks");
       }
       //catch the error that happened if the data can't be added:
     } catch (error) {
@@ -315,7 +278,7 @@ export const CenterBox = () => {
               transition={{ damping: 20, type: "spring", duration: 0.4 }}
               whileTap={{ scale: 0.85 }}
               className="h-10 rounded-4xl flex justify-center items-center font-bold w-10 focus:outline-none text-white bg-[#2F2F2F] text-[1.4rem] "
-              onClick={storeAllTasks}
+              onClick={() => storeAllTasks()}
             >
               +
             </motion.button>
