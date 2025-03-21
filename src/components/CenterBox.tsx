@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 //import framer motion
 import { motion } from "framer-motion";
 
@@ -9,7 +9,15 @@ import { Slide, ToastContainer, toast } from "react-toastify";
 import { db } from "../config/firebase";
 
 //import addDoc function to add the completed tasks to the collection in the database
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  getDocs,
+  query,
+  where,
+  doc,
+} from "firebase/firestore";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -55,11 +63,29 @@ export const CenterBox = () => {
   };
 
   //Create a delete tasks button
-  const deleteTasks = (index?: number) => {
-    setStoredTask(storedTasks.filter((tasks) => tasks.index !== index));
+  const deleteTasks = async (documentID: string) => {
+    await deleteDoc(doc(db, "completed-collection", documentID));
+    setStoredTask(storedTasks.filter((tasks) => tasks.docId !== documentID));
   };
 
   //!create a function to fetch all the data from the collection that matches the user
+  useEffect(() => {
+    const pageRefresh = async () => {
+      //create a query to fetch the data from the collection:
+      //might enter a try catch
+      const todoQuery = query(
+        collection(db, "completed-collection"),
+        where("complete", "==", false),
+        where("userId", "==", user?.uid)
+      );
+      // fetch the data from the collection
+      const data = await getDocs(todoQuery);
+      setStoredTask(
+        data.docs.map((doc) => ({ ...doc.data(), docId: doc.id })) as Tasks[]
+      );
+    };
+    pageRefresh();
+  }, [user?.uid]);
   //!only fetch when completed : false, and user : useer.uid
   //!use useEffect to make sure the function only renders once
 
@@ -89,14 +115,13 @@ export const CenterBox = () => {
       };
 
       //! use the addDoc function to add the document to the collection
+      //increase the count on the indexU
+      setIndexNumber(indexNumber + 1);
 
       await addDoc(todoRef, newTask);
 
       //clear the input state so that the input field is cleared:
       setGetTask("");
-
-      //increase the count on the indexU
-      setIndexNumber(indexNumber + 1);
     } else {
       //alert the user that the input is empty if they want to add
       alert("Please enter a task...");
@@ -126,15 +151,14 @@ export const CenterBox = () => {
       };
 
       //add the object to the empty array
+      //increase the count on the indexU
+      setIndexNumber(indexNumber + 1);
 
       //! use the addDoc function to add the document to the collection
       await addDoc(todoRef, newTask);
 
       //reset the input of the task:
       setGetTask("");
-
-      //increase the count on the indexU
-      setIndexNumber(indexNumber + 1);
     }
 
     if (event.key === "Enter" && getTask.trim() === "") {
@@ -294,7 +318,7 @@ export const CenterBox = () => {
                   {tasks.text}
                   <button
                     className="absolute right-1 w-[30px] h-[30px] flex justify-center items-center rounded-[30px] bg-[#131313] hover:bg-[#1c1b1b]"
-                    onClick={() => deleteTasks(tasks.index)} // pass the index that
+                    onClick={() => deleteTasks(tasks.docId)} // pass the index that
                   >
                     x
                   </button>
